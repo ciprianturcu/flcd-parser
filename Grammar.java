@@ -2,13 +2,14 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Grammar {
     private List<String> nonTerminals ;
     private List<String> terminals;
     private String startSymbol;
     private Map<String, List<List<String>>> productions;
+
+    private String epsilon = "epsilon";
 
     public Grammar() {
         nonTerminals = new ArrayList<>();
@@ -48,7 +49,70 @@ public class Grammar {
         }
     }
 
+    public boolean checkContextFreeGrammar() {
+        boolean startingSymbolExists = false;
+        for (String key : productions.keySet()) {
+            if (Objects.equals(key, startSymbol)) {
+                startingSymbolExists = true;
+            }
+            if (!nonTerminals.contains(key)) {
+                return false;
+            }
+        }
+        if (!startingSymbolExists) {
+            return false;
+        }
+        for (List<List<String>> production : productions.values()) {
+            for (List<String> productionRightHandSide : production) {
+                for (String val : productionRightHandSide) {
+                    if (!nonTerminals.contains(val) && !terminals.contains(val) && !Objects.equals(val, epsilon)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
 
-    //TODO - check CFG
-    //TODO - output (toString or custom printing function for the fields )
+    public void printNonTerminals() {
+        System.out.println("NONTERMINALS:");
+        for (String nonTerminal : nonTerminals) {
+            System.out.println(nonTerminal);
+        }
+    }
+
+    public void printTerminals() {
+        System.out.println("TERMINALS:");
+        for (String terminal: terminals) {
+            System.out.println(terminal);
+        }
+    }
+
+    public void printProductions() {
+        System.out.println("PRODUCTIONS:");
+        StringBuilder rhs = new StringBuilder();
+        for (String key : productions.keySet()) {
+            List<List<String>> production = productions.get(key);
+            for (List<String> productionRightHandSide : production) {
+                for (String val : productionRightHandSide) {
+                    rhs.append(val).append(" ");
+                }
+                System.out.println(key + "->" + rhs);
+                rhs.setLength(0);
+            }
+        }
+    }
+
+    public void printProductionsForNonterminal(String nonTerminal) {
+        System.out.println("PRODUCTIONS FOR " + nonTerminal);
+        StringBuilder rhs = new StringBuilder();
+        List<List<String>> production = productions.get(nonTerminal);
+        for (List<String> productionRightHandSide : production) {
+            for (String val : productionRightHandSide) {
+                rhs.append(val).append(" ");
+            }
+            System.out.println(nonTerminal + "->" + rhs);
+            rhs.setLength(0);
+        }
+    }
 }

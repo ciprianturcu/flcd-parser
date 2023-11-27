@@ -1,0 +1,144 @@
+~nonTerminals
+program compoundStmt stmtList statement assignmentStmt expression term factor arrayFactorInt declarationStmt type simpleType arrayType ioStmt ifStmt condition relation forStmt forConditions whileStmt returnStmt identifier letter digit nonZeroDigit integerConst unsigned stringConst digitSequence string char
+~terminals
+A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h i j k l m n o p q r s t u v w x y z 0 1 2 3 4 5 6 7 8 9 _ ; : , + - * / = < <= > >= == != { } [ ] ( ) begin end int char string array for if then else while return " space read write
+~startSymbol
+program
+~productions
+program -> compoundStmt
+compoundStmt -> begin stmtList end
+stmtList -> statement ;
+stmtList -> statement ; stmtList
+statement -> assignmentStmt
+statement -> declarationStmt
+statement -> ioStmt
+statement -> ifStmt
+statement -> forStmt
+statement -> whileStmt
+statement -> returnStmt
+assignmentStmt -> identifier = expression
+assignmentStmt -> identifier = { arrayFactorInt }
+expression -> expression + term
+expression -> expression - term
+expression -> term
+term -> term * factor
+term -> term / factor
+term -> factor
+factor -> ( expression )
+factor -> identifier
+factor -> integerConst
+arrayFactorInt -> integerConst
+arrayFactorInt -> arrayFactorInt , integerConst
+declarationStmt -> identifier : type
+type -> simpleType
+type -> arrayType
+simpleType -> int
+simpleType -> char
+simpleType -> string
+arrayType -> array [ simpleType ]
+ioStmt -> read ( identifier )
+ioStmt -> write ( identifier )
+ioStmt -> write ( stringConst )
+ifStmt -> if ( condition ) then compoundStmt
+ifStmt -> if ( condition ) then compoundStmt else compoundStmt
+condition -> expression relation expression
+relation -> <
+relation -> <=
+relation -> ==
+relation -> !=
+relation -> >=
+relation -> >
+forStmt -> for forConditions compoundStmt
+forConditions -> ( int assignmentStmt ; condition ; assignmentStmt )
+whileStmt -> while ( condition ) compoundStmt
+returnStmt -> return expression
+identifier -> letter
+identifier -> identifier letter
+identifier -> identifier _
+identifier -> identifier digit
+letter -> A
+letter -> B
+letter -> C
+letter -> D
+letter -> E
+letter -> F
+letter -> G
+letter -> H
+letter -> I
+letter -> J
+letter -> K
+letter -> L
+letter -> M
+letter -> N
+letter -> O
+letter -> P
+letter -> Q
+letter -> R
+letter -> S
+letter -> T
+letter -> U
+letter -> V
+letter -> W
+letter -> X
+letter -> Y
+letter -> Z
+letter -> a
+letter -> b
+letter -> c
+letter -> d
+letter -> e
+letter -> f
+letter -> g
+letter -> h
+letter -> i
+letter -> j
+letter -> k
+letter -> l
+letter -> m
+letter -> n
+letter -> o
+letter -> p
+letter -> q
+letter -> r
+letter -> s
+letter -> t
+letter -> u
+letter -> v
+letter -> w
+letter -> x
+letter -> y
+letter -> z
+digit -> 0
+digit -> 1
+digit -> 2
+digit -> 3
+digit -> 4
+digit -> 5
+digit -> 6
+digit -> 7
+digit -> 8
+digit -> 9
+integerConst -> unsigned
+integerConst -> - unsigned
+integerConst -> 0
+unsigned -> nonZeroDigit
+unsigned -> nonZeroDigit digitSequence
+nonZeroDigit -> 1
+nonZeroDigit -> 2
+nonZeroDigit -> 3
+nonZeroDigit -> 4
+nonZeroDigit -> 5
+nonZeroDigit -> 6
+nonZeroDigit -> 7
+nonZeroDigit -> 8
+nonZeroDigit -> 9
+digitSequence -> digit
+digitSequence -> digit digitSequence
+stringConst -> " string "
+stringConst -> " "
+string -> char
+string -> string char
+char -> letter
+char -> digit
+char -> _
+char -> space
