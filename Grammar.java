@@ -17,6 +17,30 @@ public class Grammar {
         productions = new HashMap<>();
     }
 
+    public List<String> getNonTerminals() {
+        return nonTerminals;
+    }
+
+    public List<String> getTerminals() {
+        return terminals;
+    }
+
+    public String getStartSymbol() {
+        return startSymbol;
+    }
+
+    public Map<String, List<List<String>>> getProductions() {
+        return productions;
+    }
+
+    public String getEpsilon() {
+        return epsilon;
+    }
+
+    public List<List<String>> getProductionForNonterminal(String nonterminal) {
+        return productions.get(nonterminal);
+    }
+
     public void readFromFile(String filename) {
         String line;
         try (FileReader fileReader = new FileReader(filename); BufferedReader bufferedReader = new BufferedReader(fileReader)) {
