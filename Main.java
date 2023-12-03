@@ -8,12 +8,15 @@ public class Main {
         System.out.println("3 - Print the set of productions");
         System.out.println("4 - Print the productions of a given nonterminal");
         System.out.println("5 - CFG check");
+        System.out.println("6 - LL1 parser FIRST set");
         System.out.println("0 - EXIT");
     }
 
     public static void cases() {
         Grammar g = new Grammar();
-        g.readFromFile("resources/g2.in");
+        g.readFromFile("resources/g1.in");
+        LL1 ll1 = new LL1(g);
+        ll1.FIRST();
         printMenu();
         Scanner scanner = new Scanner(System.in);
         System.out.println("Input the number of your option:");
@@ -34,6 +37,9 @@ public class Main {
                 case "5" -> {
                     if (g.checkContextFreeGrammar()) System.out.println("The given grammar is a CFG!");
                     else System.out.println("The given grammar is NOT a CFG!");
+                }
+                case "6" -> {
+                    ll1.printFirstSet();
                 }
             }
             System.out.println();
