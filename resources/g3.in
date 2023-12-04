@@ -11,4 +11,5 @@ S -> B a
 A -> d a
 A -> B C
 B -> g
+B -> epsilon
 C -> h

@@ -34,8 +34,7 @@ public class LL1 {
 
         // if the nonterminals contain epsilon, we must add the terminal if it is not null, otherwise epsilon
         if (allNonTerminalsContainEpsilon) {
-            if (!terminal.equals("")) concatenation.add(terminal);
-            else concatenation.add("epsilon");
+            concatenation.add(Objects.requireNonNullElse(terminal, "epsilon"));
         }
 
         // we have a while that continues until there are epsilons in the first set of the current nonterminal
@@ -53,13 +52,13 @@ public class LL1 {
     }
 
     public void FIRST() {
-        for (String nonterminal : grammar.getNonTerminals()) {
-            firstSet.put(nonterminal, new HashSet<>());
-            List<List<String>> productionsForNonterminal = grammar.getProductionForNonterminal(nonterminal);
-            for (List<String> production : productionsForNonterminal) {
+        for (String nonTerminal : grammar.getNonTerminals()) {
+            firstSet.put(nonTerminal, new HashSet<>());
+            List<List<String>> productionsForNonTerminal = grammar.getProductionForNonterminal(nonTerminal);
+            for (List<String> production : productionsForNonTerminal) {
                 // if the production starts with a terminal or epsilon, we add it to the first set
                 if (grammar.getTerminals().contains(production.get(0)) || production.get(0).equals("epsilon"))
-                    firstSet.get(nonterminal).add(production.get(0));
+                    firstSet.get(nonTerminal).add(production.get(0));
             }
         }
 

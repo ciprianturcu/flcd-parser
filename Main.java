@@ -15,7 +15,7 @@ public class Main {
 
     public static void cases() {
         Grammar g = new Grammar();
-        g.readFromFile("resources/g3.in");
+        g.readFromFile("resources/g4.in");
         LL1 ll1 = new LL1(g);
         ll1.FIRST();
         ll1.FOLLOW();

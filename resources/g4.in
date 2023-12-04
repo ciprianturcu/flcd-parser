@@ -1,0 +1,15 @@
+~nonTerminals
+S A B C D
+~terminals
++ * a ( )
+~startSymbol
+S
+~productions
+S->B A
+A->+ B A
+A->epsilon
+B->D C
+C->* D C
+C->epsilon
+D->( S )
+D->a
