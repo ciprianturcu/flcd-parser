@@ -1,0 +1,14 @@
+~nonTerminals
+S A B C
+~terminals
+a b c d g h
+~startSymbol
+S
+~productions
+S -> A C B
+S -> C b B
+S -> B a
+A -> d a
+A -> B C
+B -> g
+C -> h
