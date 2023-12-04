@@ -22,3 +22,16 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+/out/production/flcd-parser/.idea/.gitignore
+/out/production/flcd-parser/.gitignore
+/.idea/flcd-parser.iml
+/out/production/flcd-parser/.idea/flcd-parser.iml
+/out/production/flcd-parser/resources/g1.in
+/.idea/misc.xml
+/out/production/flcd-parser/.idea/misc.xml
+/.idea/modules.xml
+/out/production/flcd-parser/.idea/modules.xml
+/out/production/flcd-parser/README.md
+/.idea/vcs.xml
+/out/production/flcd-parser/.idea/vcs.xml
+/out/

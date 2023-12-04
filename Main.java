@@ -9,14 +9,16 @@ public class Main {
         System.out.println("4 - Print the productions of a given nonterminal");
         System.out.println("5 - CFG check");
         System.out.println("6 - LL1 parser FIRST set");
+        System.out.println("7 - LL1 parser FOLLOW set");
         System.out.println("0 - EXIT");
     }
 
     public static void cases() {
         Grammar g = new Grammar();
-        g.readFromFile("resources/g1.in");
+        g.readFromFile("resources/g4.in");
         LL1 ll1 = new LL1(g);
         ll1.FIRST();
+        ll1.FOLLOW();
         printMenu();
         Scanner scanner = new Scanner(System.in);
         System.out.println("Input the number of your option:");
@@ -40,6 +42,9 @@ public class Main {
                 }
                 case "6" -> {
                     ll1.printFirstSet();
+                }
+                case "7" -> {
+                    ll1.printFollowSet();
                 }
             }
             System.out.println();

@@ -73,6 +73,20 @@ public class Grammar {
         }
     }
 
+    public Map<String, Set<List<String>>> getProductionsWithNonTerminalInRHS(String nonTerminal) {
+        var productionsWithNonTerminalInRHS = new HashMap<String, Set<List<String>>>();
+        productions.forEach((leftSideOfProduction, rightSideOfProduction)->{
+            for(var production : rightSideOfProduction) {
+                if(production.contains(nonTerminal)){
+                    if(!productionsWithNonTerminalInRHS.containsKey(leftSideOfProduction))
+                        productionsWithNonTerminalInRHS.put(leftSideOfProduction, new HashSet<>());
+                    productionsWithNonTerminalInRHS.get(leftSideOfProduction).add(production);
+                }
+            }
+        });
+        return productionsWithNonTerminalInRHS;
+    }
+
     public boolean checkContextFreeGrammar() {
         boolean startingSymbolExists = false;
         for (String key : productions.keySet()) {

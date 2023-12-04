@@ -1,4 +1,5 @@
 import java.util.*;
+
 public class LL1 {
     private Grammar grammar;
     private Map<String, Set<String>> firstSet;
@@ -8,6 +9,7 @@ public class LL1 {
         this.grammar = grammar;
         this.firstSet = new HashMap<>();
         this.followSet = new HashMap<>();
+        initializeFollowSet();
     }
 
     public Set<String> concatenationOfLength1(List<String> nonTerminals, String terminal) {
@@ -32,8 +34,7 @@ public class LL1 {
 
         // if the nonterminals contain epsilon, we must add the terminal if it is not null, otherwise epsilon
         if (allNonTerminalsContainEpsilon) {
-            if (!terminal.equals("")) concatenation.add(terminal);
-            else concatenation.add("epsilon");
+            concatenation.add(Objects.requireNonNullElse(terminal, "epsilon"));
         }
 
         // we have a while that continues until there are epsilons in the first set of the current nonterminal
@@ -51,13 +52,13 @@ public class LL1 {
     }
 
     public void FIRST() {
-        for (String nonterminal : grammar.getNonTerminals()) {
-            firstSet.put(nonterminal, new HashSet<>());
-            List<List<String>> productionsForNonterminal = grammar.getProductionForNonterminal(nonterminal);
-            for (List<String> production : productionsForNonterminal) {
+        for (String nonTerminal : grammar.getNonTerminals()) {
+            firstSet.put(nonTerminal, new HashSet<>());
+            List<List<String>> productionsForNonTerminal = grammar.getProductionForNonterminal(nonTerminal);
+            for (List<String> production : productionsForNonTerminal) {
                 // if the production starts with a terminal or epsilon, we add it to the first set
                 if (grammar.getTerminals().contains(production.get(0)) || production.get(0).equals("epsilon"))
-                    firstSet.get(nonterminal).add(production.get(0));
+                    firstSet.get(nonTerminal).add(production.get(0));
             }
         }
 
@@ -80,8 +81,7 @@ public class LL1 {
                     for (String element : production) {
                         if (grammar.getNonTerminals().contains(element)) {
                             rhsNonTerminals.add(element);
-                        }
-                        else {
+                        } else {
                             rhsTerminal = element;
                             break;
                         }
@@ -96,6 +96,67 @@ public class LL1 {
             // now the first set will be the last column
             firstSet = currColumn;
         }
+    }
+
+
+    public void FOLLOW() {
+        boolean isChanged = true;
+        while (isChanged) {
+            isChanged = false;
+            HashMap<String, Set<String>> newColumn = new HashMap<>();
+
+            for (String nonTerminal : grammar.getNonTerminals()) {
+                newColumn.put(nonTerminal, new HashSet<>());
+                Set<String> followSetToBeAdded = new HashSet<>(followSet.get(nonTerminal));
+                grammar.getProductionsWithNonTerminalInRHS(nonTerminal).forEach((leftSideOfProduction, rightSideOfProduction) -> {
+                    for (List<String> production : rightSideOfProduction) {
+                        for (int index = 0; index < production.size(); index++) {
+                            if (production.get(index).equals(nonTerminal)) {
+                                if (index + 1 == production.size()) {
+                                    followSetToBeAdded.addAll(followSet.get(leftSideOfProduction));
+                                } else {
+                                    String symbolToFollow = production.get(index + 1);
+                                    if (grammar.getTerminals().contains(symbolToFollow)) {
+                                        followSetToBeAdded.add(symbolToFollow);
+                                    } else {
+                                        for (String symbol : firstSet.get(symbolToFollow)) {
+                                            if (symbol.equals("epsilon")) {
+                                                followSetToBeAdded.addAll(followSet.get(leftSideOfProduction));
+                                            } else {
+                                                followSetToBeAdded.addAll(firstSet.get(symbolToFollow));
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                if (!followSetToBeAdded.equals(followSet.get(nonTerminal))) {
+                    isChanged=true;
+                }
+                newColumn.put(nonTerminal, followSetToBeAdded);
+            }
+            followSet = newColumn;
+        }
+    }
+
+    private void initializeFollowSet() {
+        for (String nonTerminal : grammar.getNonTerminals()) {
+            followSet.put(nonTerminal, new HashSet<>());
+        }
+        followSet.get(grammar.getStartSymbol()).add("epsilon");
+    }
+
+    public void printFollowSet() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Follow Set:\n");
+
+        for (Map.Entry<String, Set<String>> entry : followSet.entrySet()) {
+            stringBuilder.append("Key: ").append(entry.getKey()).append(", Values: ").append(entry.getValue()).append("\n");
+        }
+
+        System.out.println(stringBuilder);
     }
 
     public void printFirstSet() {
