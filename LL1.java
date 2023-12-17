@@ -4,11 +4,15 @@ public class LL1 {
     private Grammar grammar;
     private Map<String, Set<String>> firstSet;
     private Map<String, Set<String>> followSet;
+    private Map<Pair, Pair> parsingTable;
+    private List<List<String>> productionsRHS;
 
     public LL1(Grammar grammar) {
         this.grammar = grammar;
         this.firstSet = new HashMap<>();
         this.followSet = new HashMap<>();
+        this.parsingTable = new HashMap<>();
+
         initializeFollowSet();
     }
 
@@ -141,6 +145,163 @@ public class LL1 {
         }
     }
 
+    public void ParsingTable() {
+        List<String> nonTerminals = grammar.getNonTerminals();
+        List<String> terminals = grammar.getTerminals();
+
+        List<String> rows = new ArrayList<>();
+        rows.addAll(nonTerminals);
+        rows.addAll(terminals);
+        rows.add("$");
+
+        List<String> cols = new ArrayList<>();
+        cols.addAll(terminals);
+        cols.add("$");
+
+        // fill in the table with (none, -1)
+        for (var row : rows)
+            for (var col : cols)
+                parsingTable.put(new Pair<>(row, col), new Pair<>("none", -1));
+
+        // now complete the pop for the terminals
+        for (var col : cols)
+            parsingTable.put(new Pair<>(col, col), new Pair<>("pop", -1));
+
+        // now put the acceptance
+        parsingTable.put(new Pair<>("$", "$"), new Pair<>("acc", -1));
+
+        var productions = grammar.getProductions();
+        this.productionsRHS = new ArrayList<>();
+
+        for (String key: productions.keySet()) {
+            for (List<String> prod: productions.get(key)) {
+                if (prod.get(0).equals("epsilon"))
+                    productionsRHS.add(new ArrayList<>(List.of("epsilon", key)));
+                else
+                    productionsRHS.add(new ArrayList<>(prod));
+            }
+        }
+
+        for (String key: productions.keySet()) {
+            for (List<String> prod: productions.get(key)) {
+                String firstSymbol = prod.get(0);
+
+                // here we treat the case where the first symbol in the rhs of a production is a terminal,
+                // so we verify if it can be added to the parsing table (and add it) or if we have a
+                // conflict
+                if (terminals.contains(firstSymbol)) {
+                    if (parsingTable.get(new Pair<>(key, firstSymbol)).getFirst().equals("none"))
+                        parsingTable.put(new Pair<>(key, firstSymbol), new Pair<>(String.join(" ", prod), productionsRHS.indexOf(prod) + 1));
+                    else {
+                        try {
+                            throw new Exception("CONFLICT: " + key + ", " + firstSymbol);
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                // here we treat the case where the first symbol in the rhs of a production is a nonTerminal,
+                else if (nonTerminals.contains(firstSymbol)) {
+
+                    // if the production rhs has only one nonTerminal, we get FIRST of that nonTerminal and then,
+                    // for each element of FIRST we verify if it can be added to the parsing table (and add it)
+                    // or if we have a conflict
+                    if (prod.size() == 1) {
+                        for (var symbol: firstSet.get(firstSymbol)) {
+                            if (parsingTable.get(new Pair<>(key, symbol)).getFirst().equals("none"))
+                                parsingTable.put(new Pair<>(key, symbol), new Pair<>(String.join(" ", prod), productionsRHS.indexOf(prod) + 1));
+                            else {
+                                try {
+                                    throw new Exception("CONFLICT: " + key + ", " + symbol);
+                                }
+                                catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }
+
+                    // if not, we take the next symbol in the current production
+                    else {
+                        var nextSymbol = prod.get(1);
+                        var firstOfCurrentProduction = firstSet.get(firstSymbol);
+                        var i = 1;
+
+                        // while we have not parsed all the symbols of the current production
+                        // and the next symbol is a nonTerminal, we check if the current FIRST of the
+                        // production contains epsilon, and if so, we remove it and add the first of the next symbol
+                        while (i < prod.size() && nonTerminals.contains(nextSymbol)) {
+                            var firstOfNextSymbol = firstSet.get(nextSymbol);
+
+                            if (firstOfCurrentProduction.contains("epsilon")) {
+                                firstOfCurrentProduction.remove("epsilon");
+                                firstOfCurrentProduction.addAll(firstOfNextSymbol);
+                            }
+
+                            i++;
+                            if (i < prod.size())
+                                nextSymbol = prod.get(i);
+                        }
+
+                        // now we take all the symbols in the FIRST of the current production, and if in the corresponding
+                        // position in the parsing table we add it, otherwise we have a conflict
+                        for (var symbol : firstOfCurrentProduction) {
+                            if (symbol.equals("epsilon"))
+                                symbol = "$";
+                            if (parsingTable.get(new Pair<>(key, symbol)).getFirst().equals("none"))
+                                parsingTable.put(new Pair<>(key, symbol), new Pair<>(String.join(" ", prod), productionsRHS.indexOf(prod) + 1));
+                            else {
+                                try {
+                                    throw new Exception("CONFLICT: " + key + ", " + symbol);
+                                }
+                                catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // otherwise, if all the first symbols in the production is a terminal, we take the follow and if
+                // in the corresponding position in the parsing table we add it, otherwise we have a conflict
+                else {
+                    var follow = followSet.get(key);
+                    for (var symbol : follow) {
+                        if (symbol.equals("epsilon")) {
+                            symbol = "$";
+                            if (parsingTable.get(new Pair<>(key, symbol)).getFirst().equals("none")) {
+                                var p = new ArrayList<>(List.of("epsilon", key));
+                                parsingTable.put(new Pair<>(key, symbol), new Pair<>("epsilon", productionsRHS.indexOf(p) + 1));
+                            }
+                            else {
+                                try {
+                                    throw new Exception("CONFLICT: " + key + ", " + symbol);
+                                }
+                                catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                        else if (parsingTable.get(new Pair<>(key, symbol)).getFirst().equals("none")) {
+                            var p = new ArrayList<>(List.of("epsilon", key));
+                            parsingTable.put(new Pair<>(key, symbol), new Pair<>("epsilon", productionsRHS.indexOf(p) + 1));
+                        }
+                        else {
+                            try {
+                                throw new Exception("CONFLICT: " + key + ", " + symbol);
+                            }
+                            catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private void initializeFollowSet() {
         for (String nonTerminal : grammar.getNonTerminals()) {
             followSet.put(nonTerminal, new HashSet<>());
@@ -169,4 +330,109 @@ public class LL1 {
 
         System.out.println(stringBuilder);
     }
+
+    public void printParsingTable() {
+        List<String> nonTerminals = grammar.getNonTerminals();
+        List<String> terminals = grammar.getTerminals();
+
+        List<String> rows = new ArrayList<>();
+        rows.addAll(nonTerminals);
+        rows.addAll(terminals);
+        rows.add("$");
+
+        List<String> cols = new ArrayList<>();
+        cols.addAll(terminals);
+        cols.add("$");
+
+        int rowHeaderWidth = 3;
+        int colHeaderWidth = 10;
+
+        // Print column headers
+        System.out.printf("%-" + rowHeaderWidth + "s |", ""); // Empty space for row header column
+        for (String col : cols) {
+            System.out.printf(" %-" + colHeaderWidth + "s |", col);
+        }
+        System.out.println();
+
+        // Print separator
+        int totalWidth = rowHeaderWidth + 3 + (colHeaderWidth + 3) * cols.size(); // 3 accounts for spaces and vertical bars
+        for (int i = 0; i < totalWidth; i++) {
+            System.out.print("-");
+        }
+        System.out.println();
+
+        // Print rows with their respective data
+        for (String row : rows) {
+            System.out.printf("%-" + rowHeaderWidth + "s |", row);
+            for (String col : cols) {
+                Pair<String, Integer> cell = parsingTable.get(new Pair<>(row, col));
+                System.out.printf(" %-" + colHeaderWidth + "s |", removeSpacesFromString(cell.getFirst()) + ", " + cell.getSecond());
+            }
+            System.out.println();
+        }
+    }
+
+    public List<Integer> parseSequence(List<String> sequence) {
+        Stack<String> alpha = new Stack<>();
+        Stack<String> beta = new Stack<>();
+        List<Integer> result = new ArrayList<>();
+
+        // initialize the alpha stack with $ and the sequence
+        alpha.push("$");
+        for (var i = sequence.size() - 1; i >= 0; i--)
+            alpha.push(sequence.get(i));
+
+        // initialize the beta stack with $ and the starting symbol
+        beta.push("$");
+        beta.push(grammar.getStartSymbol());
+
+        // while we do not have reached accept
+        while (! (alpha.peek().equals("$") && beta.peek().equals("$"))) {
+            // we get the top of the stacks and the corresponding element from the table
+            String alphaTopElement = alpha.peek();
+            String betaTopElement = beta.peek();
+            Pair<String, String> key = new Pair<>(betaTopElement, alphaTopElement);
+            Pair<String, Integer> value = parsingTable.get(key);
+
+            // if in the parsing table we have none it means that the sequence is not accepted by the grammar
+            if (value.getFirst().equals("none")) {
+                System.out.println("Syntax error for: " + key);
+                result = new ArrayList<>(List.of(-1));
+                return result;
+            }
+
+            // if we have pop, we have to pop the top of the stacks
+            if (value.getFirst().equals("pop")) {
+                alpha.pop();
+                beta.pop();
+            }
+            // otherwise we pop the top of beta and if the value from the table is not epsilon, we add the values to
+            // beta and the corresponding number of the production to the productions string
+            else {
+                beta.pop();
+                if (!value.getFirst().equals("epsilon")) {
+                    String[] symbols = value.getFirst().split(" ");
+                    for (var i = symbols.length - 1; i >= 0; i--) {
+                        beta.push(symbols[i]);
+                    }
+                }
+                result.add(value.getSecond());
+            }
+        }
+        return result;
+    }
+
+    private String removeSpacesFromString(String s) {
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c != ' ') {
+                sb.append(c);
+            }
+        }
+
+        return sb.toString();
+    }
+
 }
