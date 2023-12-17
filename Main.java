@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -10,6 +12,8 @@ public class Main {
         System.out.println("5 - CFG check");
         System.out.println("6 - LL1 parser FIRST set");
         System.out.println("7 - LL1 parser FOLLOW set");
+        System.out.println("8 - Parsing Table");
+        System.out.println("9 - Parse Sequence");
         System.out.println("0 - EXIT");
     }
 
@@ -19,6 +23,7 @@ public class Main {
         LL1 ll1 = new LL1(g);
         ll1.FIRST();
         ll1.FOLLOW();
+        ll1.ParsingTable();
         printMenu();
         Scanner scanner = new Scanner(System.in);
         System.out.println("Input the number of your option:");
@@ -45,6 +50,19 @@ public class Main {
                 }
                 case "7" -> {
                     ll1.printFollowSet();
+                }
+                case "8" -> {
+                    ll1.printParsingTable();
+                }
+                case "9" -> {
+                    List<String> sequence = new ArrayList<>(List.of("a", "*", "(", "a", "+", "a", ")"));
+                    List<Integer> productionString = ll1.parseSequence(sequence);
+                    StringBuilder stringBuilder = new StringBuilder();
+                    for (int i = 0; i < productionString.size(); i++) {
+                        stringBuilder.append(productionString.get(i));
+                        stringBuilder.append(" ");
+                    }
+                    System.out.println(stringBuilder);
                 }
             }
             System.out.println();
