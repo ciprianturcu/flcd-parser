@@ -1,3 +1,4 @@
+import javax.swing.text.html.parser.Parser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -5,15 +6,16 @@ import java.util.Scanner;
 
 public class Main {
     public static void printMenu() {
-        System.out.println("1 - Print the set of nonterminals");
-        System.out.println("2 - Print the set of terminals");
-        System.out.println("3 - Print the set of productions");
-        System.out.println("4 - Print the productions of a given nonterminal");
-        System.out.println("5 - CFG check");
-        System.out.println("6 - LL1 parser FIRST set");
-        System.out.println("7 - LL1 parser FOLLOW set");
-        System.out.println("8 - Parsing Table");
-        System.out.println("9 - Parse Sequence");
+        System.out.println("1  - Print the set of nonterminals");
+        System.out.println("2  - Print the set of terminals");
+        System.out.println("3  - Print the set of productions");
+        System.out.println("4  - Print the productions of a given nonterminal");
+        System.out.println("5  - CFG check");
+        System.out.println("6  - LL1 parser FIRST set");
+        System.out.println("7  - LL1 parser FOLLOW set");
+        System.out.println("8  - Parsing Table");
+        System.out.println("9  - Parse Sequence");
+        System.out.println("10 - Print parse tree");
         System.out.println("0 - EXIT");
     }
 
@@ -63,6 +65,11 @@ public class Main {
                         stringBuilder.append(" ");
                     }
                     System.out.println(stringBuilder);
+                }
+                case "10" -> {
+                    List<String> sequence = new ArrayList<>(List.of("a", "*", "(", "a", "+", "a", ")"));
+                    ParserOutput parserOutput = new ParserOutput(ll1, sequence, "output/out.txt");
+                    parserOutput.printTree();
                 }
             }
             System.out.println();
