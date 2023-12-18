@@ -16,6 +16,18 @@ public class LL1 {
         initializeFollowSet();
     }
 
+    public Grammar getGrammar() {
+        return grammar;
+    }
+
+    public List<String> getProductionRHSByLevel(int level) {
+        var production = productionsRHS.get(level - 1);
+        if (production.contains("epsilon")) {
+            return List.of("epsilon");
+        }
+        return production;
+    }
+
     public Set<String> concatenationOfLength1(List<String> nonTerminals, String terminal) {
         // in this case we already added all terminals
         if (nonTerminals.size() == 0) {
@@ -137,7 +149,7 @@ public class LL1 {
                     }
                 });
                 if (!followSetToBeAdded.equals(followSet.get(nonTerminal))) {
-                    isChanged=true;
+                    isChanged = true;
                 }
                 newColumn.put(nonTerminal, followSetToBeAdded);
             }
@@ -173,8 +185,8 @@ public class LL1 {
         var productions = grammar.getProductions();
         this.productionsRHS = new ArrayList<>();
 
-        for (String key: productions.keySet()) {
-            for (List<String> prod: productions.get(key)) {
+        for (String key : productions.keySet()) {
+            for (List<String> prod : productions.get(key)) {
                 if (prod.get(0).equals("epsilon"))
                     productionsRHS.add(new ArrayList<>(List.of("epsilon", key)));
                 else
@@ -182,8 +194,8 @@ public class LL1 {
             }
         }
 
-        for (String key: productions.keySet()) {
-            for (List<String> prod: productions.get(key)) {
+        for (String key : productions.keySet()) {
+            for (List<String> prod : productions.get(key)) {
                 String firstSymbol = prod.get(0);
 
                 // here we treat the case where the first symbol in the rhs of a production is a terminal,
@@ -195,8 +207,7 @@ public class LL1 {
                     else {
                         try {
                             throw new Exception("CONFLICT: " + key + ", " + firstSymbol);
-                        }
-                        catch (Exception e) {
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
@@ -209,14 +220,13 @@ public class LL1 {
                     // for each element of FIRST we verify if it can be added to the parsing table (and add it)
                     // or if we have a conflict
                     if (prod.size() == 1) {
-                        for (var symbol: firstSet.get(firstSymbol)) {
+                        for (var symbol : firstSet.get(firstSymbol)) {
                             if (parsingTable.get(new Pair<>(key, symbol)).getFirst().equals("none"))
                                 parsingTable.put(new Pair<>(key, symbol), new Pair<>(String.join(" ", prod), productionsRHS.indexOf(prod) + 1));
                             else {
                                 try {
                                     throw new Exception("CONFLICT: " + key + ", " + symbol);
-                                }
-                                catch (Exception e) {
+                                } catch (Exception e) {
                                     e.printStackTrace();
                                 }
                             }
@@ -255,8 +265,7 @@ public class LL1 {
                             else {
                                 try {
                                     throw new Exception("CONFLICT: " + key + ", " + symbol);
-                                }
-                                catch (Exception e) {
+                                } catch (Exception e) {
                                     e.printStackTrace();
                                 }
                             }
@@ -274,25 +283,20 @@ public class LL1 {
                             if (parsingTable.get(new Pair<>(key, symbol)).getFirst().equals("none")) {
                                 var p = new ArrayList<>(List.of("epsilon", key));
                                 parsingTable.put(new Pair<>(key, symbol), new Pair<>("epsilon", productionsRHS.indexOf(p) + 1));
-                            }
-                            else {
+                            } else {
                                 try {
                                     throw new Exception("CONFLICT: " + key + ", " + symbol);
-                                }
-                                catch (Exception e) {
+                                } catch (Exception e) {
                                     e.printStackTrace();
                                 }
                             }
-                        }
-                        else if (parsingTable.get(new Pair<>(key, symbol)).getFirst().equals("none")) {
+                        } else if (parsingTable.get(new Pair<>(key, symbol)).getFirst().equals("none")) {
                             var p = new ArrayList<>(List.of("epsilon", key));
                             parsingTable.put(new Pair<>(key, symbol), new Pair<>("epsilon", productionsRHS.indexOf(p) + 1));
-                        }
-                        else {
+                        } else {
                             try {
                                 throw new Exception("CONFLICT: " + key + ", " + symbol);
-                            }
-                            catch (Exception e) {
+                            } catch (Exception e) {
                                 e.printStackTrace();
                             }
                         }
@@ -387,7 +391,7 @@ public class LL1 {
         beta.push(grammar.getStartSymbol());
 
         // while we do not have reached accept
-        while (! (alpha.peek().equals("$") && beta.peek().equals("$"))) {
+        while (!(alpha.peek().equals("$") && beta.peek().equals("$"))) {
             // we get the top of the stacks and the corresponding element from the table
             String alphaTopElement = alpha.peek();
             String betaTopElement = beta.peek();
