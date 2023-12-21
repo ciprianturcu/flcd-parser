@@ -34,6 +34,7 @@ public class ParserOutput {
                 while (!nodeStack.isEmpty() && !nodeStack.peek().getHasRight()) nodeStack.pop();
                 if (!nodeStack.isEmpty()) {
                     nodeStack.pop();
+                    continue;
                 } else {
                     break;
                 }
