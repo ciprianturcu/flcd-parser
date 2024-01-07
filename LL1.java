@@ -411,6 +411,7 @@ public class LL1 {
             // if in the parsing table we have none it means that the sequence is not accepted by the grammar
             if (value.getFirst().equals("none")) {
                 System.out.println("Syntax error for: " + key);
+                System.out.println("Failed at alpha : " + alphaTopElement + "beta : " + betaTopElement);
                 result = new ArrayList<>(List.of(-1));
                 return result;
             }
