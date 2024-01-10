@@ -15,17 +15,21 @@ public class Main {
         System.out.println("7  - LL1 parser FOLLOW set");
         System.out.println("8  - Parsing Table");
         System.out.println("9  - Parse Sequence");
-        System.out.println("10 - Print parse tree");
+        System.out.println("10 - Print parse tree for g1");
+        System.out.println("11 - Print parse tree for g2");
         System.out.println("0 - EXIT");
     }
 
     public static void cases() {
         Grammar g = new Grammar();
-        g.readFromFile("resources/g4.in");
+        String filename = "resources/g2.in";
+        g.readFromFile(filename);
         LL1 ll1 = new LL1(g);
         ll1.FIRST();
         ll1.FOLLOW();
         ll1.ParsingTable();
+        MyScanner s = new MyScanner("D:\\flcd-parser\\problem.txt");
+        s.scan();
         printMenu();
         Scanner scanner = new Scanner(System.in);
         System.out.println("Input the number of your option:");
@@ -68,7 +72,14 @@ public class Main {
                 }
                 case "10" -> {
                     List<String> sequence = new ArrayList<>(List.of("a", "*", "(", "a", "+", "a", ")"));
-                    ParserOutput parserOutput = new ParserOutput(ll1, sequence, "output/out.txt");
+                    ParserOutput parserOutput = new ParserOutput(ll1, sequence, "output/out1.txt");
+                    parserOutput.printTree();
+                }
+                case "11" -> {
+                    if (filename.contains("g1"))
+                        System.out.println("Please change grammar to use this option!  ");
+                    List<String> sequence = PIF.readFromPifOutput("PIF.out");
+                    ParserOutput parserOutput = new ParserOutput(ll1, sequence, "output/out2.txt");
                     parserOutput.printTree();
                 }
             }
